@@ -2,7 +2,9 @@ import { Component } from 'react';
 import { ToastContainer } from 'react-toastify';
 import { Searchbar } from './Searchbar';
 import { fetchRequest } from './API/api';
-import { ImageGallery } from './ImageGallery/ImageGallery';
+import { ImageGallery } from './ImageGallery';
+import { Loader } from './Loader';
+import { Modal } from './Modal/Modal';
 
 export class App extends Component {
   state = {
@@ -10,6 +12,8 @@ export class App extends Component {
     images: [],
     loading: false,
     error: null,
+    largeImage: '',
+    showModal: false,
   };
 
   handleSubmit = value => {
@@ -18,27 +22,40 @@ export class App extends Component {
     });
   };
 
+  openModal = img => {
+    this.setState({ showModal: true });
+    this.setState({ largeImage: img });
+  };
+
+  closeModal = () => {
+    this.setState({ showModal: false });
+    this.setState({ largeImage: '' });
+  };
   componentDidUpdate(_, prevState) {
     if (prevState.searchValue !== this.state.searchValue) {
       this.setState({ loading: true });
+      this.setState({ images: [] });
 
       setTimeout(() => {
         fetchRequest(this.state.searchValue)
           .then(image => this.setState({ images: image.hits }))
           .catch(error => this.setState({ error: error }))
           .finally(this.setState({ loading: false }));
-      }, 3000);
+      }, 2000);
     }
   }
 
   render() {
-    const { images, loading } = this.state;
+    const { images, loading, largeImage } = this.state;
     return (
       <div>
         <ToastContainer autoClose={3000} />
         <Searchbar onSubmit={this.handleSubmit} />
-        {loading && <h1>Loading...</h1>}
-        <ImageGallery data={images} />
+        {loading && <Loader />}
+        <ImageGallery data={images} openModal={this.openModal} />
+        {largeImage && (
+          <Modal largeImage={largeImage} closeModal={this.closeModal} />
+        )}
       </div>
     );
   }
