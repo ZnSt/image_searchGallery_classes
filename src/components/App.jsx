@@ -4,7 +4,8 @@ import { Searchbar } from './Searchbar';
 import { fetchRequest } from './API/api';
 import { ImageGallery } from './ImageGallery';
 import { Loader } from './Loader';
-import { Modal } from './Modal/Modal';
+import { Modal } from './Modal';
+import { Button } from './Button';
 
 export class App extends Component {
   state = {
@@ -14,6 +15,8 @@ export class App extends Component {
     error: null,
     largeImage: '',
     showModal: false,
+    page: 1,
+    backToUp: false,
   };
 
   handleSubmit = value => {
@@ -22,6 +25,11 @@ export class App extends Component {
     });
   };
 
+  loadMore = () => {
+    this.setState(prevState => ({
+      page: prevState.page + 1,
+    }));
+  };
   openModal = img => {
     this.setState({ showModal: true });
     this.setState({ largeImage: img });
@@ -37,8 +45,12 @@ export class App extends Component {
       this.setState({ images: [] });
 
       setTimeout(() => {
-        fetchRequest(this.state.searchValue)
-          .then(image => this.setState({ images: image.hits }))
+        fetchRequest(this.state.searchValue, this.state.page)
+          .then(image =>
+            this.setState(prevStateImg => ({
+              images: [...prevStateImg.images, ...image.hits],
+            }))
+          )
           .catch(error => this.setState({ error: error }))
           .finally(this.setState({ loading: false }));
       }, 2000);
@@ -56,7 +68,10 @@ export class App extends Component {
         {largeImage && (
           <Modal largeImage={largeImage} closeModal={this.closeModal} />
         )}
+        {images.length > 0 && <Button loadMore={this.loadMore} />}
       </div>
     );
   }
 }
+
+// .then(image => this.setState({ images: image.hits }))

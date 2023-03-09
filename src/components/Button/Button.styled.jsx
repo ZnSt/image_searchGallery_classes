@@ -1,5 +1,11 @@
 import styled from '@emotion/styled';
 
+export const BtnContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+`;
 export const Btn = styled.button`
   padding: 8px 16px;
   border-radius: 2px;
