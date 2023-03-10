@@ -6,6 +6,7 @@ import { ImageGallery } from './ImageGallery';
 import { Loader } from './Loader';
 import { Modal } from './Modal';
 import { Button } from './Button';
+import { BtnUp } from './BtnUp/BtnUp';
 
 export class App extends Component {
   state = {
@@ -22,6 +23,8 @@ export class App extends Component {
   handleSubmit = value => {
     this.setState({
       searchValue: value,
+      images: [],
+      page: 1,
     });
   };
 
@@ -46,21 +49,47 @@ export class App extends Component {
 
       setTimeout(() => {
         fetchRequest(this.state.searchValue, this.state.page)
-          .then(image =>
-            this.setState(prevStateImg => ({
-              images: [...prevStateImg.images, ...image.hits],
-            }))
-          )
+          .then(image => {
+            console.log(image);
+            this.setState({ images: image.hits });
+          })
           .catch(error => this.setState({ error: error }))
           .finally(this.setState({ loading: false }));
       }, 2000);
     }
+
+    if (prevState.page !== this.state.page) {
+      fetchRequest(this.state.searchValue, this.state.page)
+        .then(image =>
+          this.setState(prevStateImg => ({
+            images: [...prevStateImg.images, ...image.hits],
+          }))
+        )
+        .catch(error => this.setState({ error: error }))
+        .finally(this.setState({ loading: false }));
+    }
+
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) {
+        this.setState({ backToUp: true });
+      } else {
+        this.setState({ backToUp: false });
+      }
+    });
   }
 
+  scrollUp = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
+
   render() {
-    const { images, loading, largeImage } = this.state;
+    const { images, loading, largeImage, backToUp } = this.state;
     return (
       <div>
+        {backToUp && <BtnUp scrollUp={this.scrollUp} />}
         <ToastContainer autoClose={3000} />
         <Searchbar onSubmit={this.handleSubmit} />
         {loading && <Loader />}
@@ -73,5 +102,3 @@ export class App extends Component {
     );
   }
 }
-
-// .then(image => this.setState({ images: image.hits }))
