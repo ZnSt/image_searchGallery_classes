@@ -1,7 +1,8 @@
 import { Component } from 'react';
 import { ToastContainer } from 'react-toastify';
-import { Searchbar } from './Searchbar';
 import { fetchRequest } from './API/api';
+
+import { Searchbar } from './Searchbar';
 import { ImageGallery } from './ImageGallery';
 import { Loader } from './Loader';
 import { Modal } from './Modal';
@@ -53,7 +54,9 @@ export class App extends Component {
             console.log(image);
             this.setState({ images: image.hits });
           })
-          .catch(error => this.setState({ error: error }))
+          .catch(error => {
+            this.setState({ error: error });
+          })
           .finally(this.setState({ loading: false }));
       }, 2000);
     }
@@ -97,6 +100,7 @@ export class App extends Component {
         {largeImage && (
           <Modal largeImage={largeImage} closeModal={this.closeModal} />
         )}
+
         {images.length > 0 && <Button loadMore={this.loadMore} />}
       </div>
     );
